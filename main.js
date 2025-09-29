@@ -16,7 +16,7 @@ let hp = 100;
 let gameOver = false;
 let enemySpawnRate = 1000; // ms
 let lastEnemySpawn = 0;
-let animationId; // for cancelAnimationFrame
+let animationId; // to manage requestAnimationFrame
 
 // ====== Assets ======
 const playerImg = new Image();
@@ -59,12 +59,13 @@ function resetGame() {
   player.y = canvas.height - 100;
   generateLogos();
 
-  // Cancel old loop to avoid speed increase
+  // Cancel old loop to fix speed issue
   if (animationId) {
     cancelAnimationFrame(animationId);
   }
 
-  loop();
+  // Start fresh loop
+  loop(0);
 }
 
 function spawnEnemy() {
@@ -209,7 +210,7 @@ function draw() {
   document.getElementById("score").textContent = score;
   document.getElementById("hp").textContent = hp;
 
-  // Update highest score
+  // Highest score logic
   if (score > highscore) {
     highscore = score;
   }
@@ -229,7 +230,7 @@ function loop(timestamp) {
   update(timestamp);
   draw();
   if (!gameOver) {
-    animationId = requestAnimationFrame(loop);
+    animationId = requestAnimationFrame(loop); // ID store here
   }
 }
 
