@@ -11,11 +11,12 @@ let bullets = [];
 let enemies = [];
 let logos = [];
 let score = 0;
+let highscore = 0;
 let hp = 100;
-let bossTimer = 30;
 let gameOver = false;
 let enemySpawnRate = 1000; // ms
 let lastEnemySpawn = 0;
+let animationId; // for cancelAnimationFrame
 
 // ====== Assets ======
 const playerImg = new Image();
@@ -51,13 +52,18 @@ document.getElementById("restartBtn").addEventListener("click", resetGame);
 function resetGame() {
   score = 0;
   hp = 100;
-  bossTimer = 30;
   bullets = [];
   enemies = [];
   gameOver = false;
   player.x = canvas.width / 2 - 30;
   player.y = canvas.height - 100;
   generateLogos();
+
+  // Cancel old loop to avoid speed increase
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+  }
+
   loop();
 }
 
@@ -178,10 +184,6 @@ function update(timestamp) {
       }
     }
   }
-  
-  // Update boss timer
-  bossTimer -= 1/60; // Assuming 60 FPS
-  if(bossTimer < 0) bossTimer = 0;
 }
 
 function draw() {
@@ -206,7 +208,12 @@ function draw() {
   // HUD Update
   document.getElementById("score").textContent = score;
   document.getElementById("hp").textContent = hp;
-  document.getElementById("boss").textContent = Math.floor(bossTimer);
+
+  // Update highest score
+  if (score > highscore) {
+    highscore = score;
+  }
+  document.getElementById("highscore").textContent = highscore;
   
   if (gameOver) {
     ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
@@ -222,7 +229,7 @@ function loop(timestamp) {
   update(timestamp);
   draw();
   if (!gameOver) {
-    requestAnimationFrame(loop);
+    animationId = requestAnimationFrame(loop);
   }
 }
 
