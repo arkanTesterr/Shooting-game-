@@ -55,6 +55,7 @@ function resetGame() {
   bullets = [];
   enemies = [];
   gameOver = false;
+  keys = {};   // ✅ reset keys on restart
   player.x = canvas.width / 2 - 30;
   player.y = canvas.height - 100;
   generateLogos();
@@ -182,6 +183,7 @@ function update(timestamp) {
       if (hp <= 0) {
         hp = 0;
         gameOver = true;
+        keys = {};   // ✅ reset keys on game over
       }
     }
   }
