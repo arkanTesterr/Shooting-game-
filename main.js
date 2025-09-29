@@ -56,6 +56,7 @@ function resetGame() {
   enemies = [];
   gameOver = false;
   keys = {};   // ✅ reset keys on restart
+  lastEnemySpawn = 0; // ✅ reset enemy spawn timer
   player.x = canvas.width / 2 - 30;
   player.y = canvas.height - 100;
   generateLogos();
