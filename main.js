@@ -66,7 +66,11 @@ function resetGame() {
     cancelAnimationFrame(animationId); // stop old loop
   }
 
-  loop(0); // start new loop
+  loop(0);
+
+  // ✅ Fix: remove focus from restart button so space doesn’t trigger it
+  document.activeElement.blur();
+  canvas.focus();
 }
 
 function spawnEnemy() {
@@ -102,7 +106,7 @@ function generateLogos() {
 
 function drawBackground() {
   logos.forEach((l) => {
-    ctx.globalAlpha = 0.07;
+    ctx.globalAlpha = 0.07; // light watermark effect
     ctx.drawImage(logoImg, l.x, l.y, l.size, l.size);
     ctx.globalAlpha = 1.0;
   });
@@ -163,6 +167,7 @@ function update(timestamp) {
   }
   
   // Collision detection
+  // Bullets vs Enemies
   for (let i = bullets.length - 1; i >= 0; i--) {
     for (let j = enemies.length - 1; j >= 0; j--) {
       if (checkCollision(bullets[i], enemies[j])) {
@@ -174,6 +179,7 @@ function update(timestamp) {
     }
   }
 
+  // Player vs Enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (checkCollision(player, enemies[i])) {
       enemies.splice(i, 1);
@@ -211,6 +217,7 @@ function draw() {
   document.getElementById("score").textContent = score;
   document.getElementById("hp").textContent = hp;
 
+  // Highest score logic
   if (score > highscore) {
     highscore = score;
   }
