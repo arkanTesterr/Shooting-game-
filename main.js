@@ -17,7 +17,6 @@ let gameOver = false;
 let enemySpawnRate = 1000; // ms
 let lastEnemySpawn = 0;
 let animationId; // to manage requestAnimationFrame
-let listenersAdded = false; // ✅ new flag to prevent duplicate listeners
 
 // ====== Assets ======
 const playerImg = new Image();
@@ -44,14 +43,10 @@ let player = {
   lastShot: 0,
 };
 
-// ====== Events (only once) ======
-function addListenersOnce() {
-  if (listenersAdded) return; // ✅ prevent duplicate
-  document.addEventListener("keydown", (e) => { keys[e.key] = true; });
-  document.addEventListener("keyup", (e) => { keys[e.key] = false; });
-  document.getElementById("restartBtn").addEventListener("click", resetGame);
-  listenersAdded = true;
-}
+// ====== Events ======
+document.addEventListener("keydown", (e) => { keys[e.key] = true; });
+document.addEventListener("keyup", (e) => { keys[e.key] = false; });
+document.getElementById("restartBtn").addEventListener("click", resetGame);
 
 // ====== Utility Functions ======
 function resetGame() {
@@ -60,14 +55,15 @@ function resetGame() {
   bullets = [];
   enemies = [];
   gameOver = false;
-  keys = {};   // ✅ reset keys
-  lastEnemySpawn = 0; // ✅ reset spawn timer
+  keys = {};              // ✅ reset all key states
+  player.lastShot = 0;    // ✅ reset shooting cooldown
+  lastEnemySpawn = 0;     // ✅ reset enemy spawn timer
   player.x = canvas.width / 2 - 30;
   player.y = canvas.height - 100;
   generateLogos();
 
   if (animationId) {
-    cancelAnimationFrame(animationId); // ✅ stop old loop
+    cancelAnimationFrame(animationId); // stop old loop
   }
 
   loop(0); // start new loop
@@ -185,7 +181,8 @@ function update(timestamp) {
       if (hp <= 0) {
         hp = 0;
         gameOver = true;
-        keys = {};   // ✅ reset keys on game over
+        keys = {};           // ✅ reset keys on game over
+        player.lastShot = 0; // ✅ reset shooting cooldown
       }
     }
   }
@@ -238,6 +235,5 @@ function loop(timestamp) {
 }
 
 // ====== Init ======
-addListenersOnce(); // ✅ ensure listeners only once
 generateLogos();
 loop(0);
