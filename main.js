@@ -17,6 +17,7 @@ let gameOver = false;
 let enemySpawnRate = 1000; // ms
 let lastEnemySpawn = 0;
 let animationId; // to manage requestAnimationFrame
+let listenersAdded = false; // ✅ new flag to prevent duplicate listeners
 
 // ====== Assets ======
 const playerImg = new Image();
@@ -43,10 +44,14 @@ let player = {
   lastShot: 0,
 };
 
-// ====== Events ======
-document.addEventListener("keydown", (e) => { keys[e.key] = true; });
-document.addEventListener("keyup", (e) => { keys[e.key] = false; });
-document.getElementById("restartBtn").addEventListener("click", resetGame);
+// ====== Events (only once) ======
+function addListenersOnce() {
+  if (listenersAdded) return; // ✅ prevent duplicate
+  document.addEventListener("keydown", (e) => { keys[e.key] = true; });
+  document.addEventListener("keyup", (e) => { keys[e.key] = false; });
+  document.getElementById("restartBtn").addEventListener("click", resetGame);
+  listenersAdded = true;
+}
 
 // ====== Utility Functions ======
 function resetGame() {
@@ -55,19 +60,17 @@ function resetGame() {
   bullets = [];
   enemies = [];
   gameOver = false;
-  keys = {};   // ✅ reset keys on restart
-  lastEnemySpawn = 0; // ✅ reset enemy spawn timer
+  keys = {};   // ✅ reset keys
+  lastEnemySpawn = 0; // ✅ reset spawn timer
   player.x = canvas.width / 2 - 30;
   player.y = canvas.height - 100;
   generateLogos();
 
-  // Cancel old loop to fix speed issue
   if (animationId) {
-    cancelAnimationFrame(animationId);
+    cancelAnimationFrame(animationId); // ✅ stop old loop
   }
 
-  // Start fresh loop
-  loop(0);
+  loop(0); // start new loop
 }
 
 function spawnEnemy() {
@@ -103,7 +106,7 @@ function generateLogos() {
 
 function drawBackground() {
   logos.forEach((l) => {
-    ctx.globalAlpha = 0.07; // light watermark effect
+    ctx.globalAlpha = 0.07;
     ctx.drawImage(logoImg, l.x, l.y, l.size, l.size);
     ctx.globalAlpha = 1.0;
   });
@@ -164,7 +167,6 @@ function update(timestamp) {
   }
   
   // Collision detection
-  // Bullets vs Enemies
   for (let i = bullets.length - 1; i >= 0; i--) {
     for (let j = enemies.length - 1; j >= 0; j--) {
       if (checkCollision(bullets[i], enemies[j])) {
@@ -176,7 +178,6 @@ function update(timestamp) {
     }
   }
 
-  // Player vs Enemies
   for (let i = enemies.length - 1; i >= 0; i--) {
     if (checkCollision(player, enemies[i])) {
       enemies.splice(i, 1);
@@ -213,7 +214,6 @@ function draw() {
   document.getElementById("score").textContent = score;
   document.getElementById("hp").textContent = hp;
 
-  // Highest score logic
   if (score > highscore) {
     highscore = score;
   }
@@ -233,10 +233,11 @@ function loop(timestamp) {
   update(timestamp);
   draw();
   if (!gameOver) {
-    animationId = requestAnimationFrame(loop); // ID store here
+    animationId = requestAnimationFrame(loop);
   }
 }
 
 // ====== Init ======
+addListenersOnce(); // ✅ ensure listeners only once
 generateLogos();
 loop(0);
